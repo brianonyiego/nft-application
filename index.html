@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple NFT App</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6;
+        }
+        h1, h2 { color: #333; }
+        input, button { 
+            margin: 5px 0; 
+            padding: 8px; 
+            width: 100%; 
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover { background-color: #45a049; }
+        #nftList { margin-top: 20px; }
+        .nft-item { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple NFT App</h1>
+    
+    <h2>Create NFT</h2>
+    <input type="text" id="nftName" placeholder="NFT Name">
+    <input type="text" id="nftDescription" placeholder="NFT Description">
+    <input type="text" id="nftOwner" placeholder="Owner ID">
+    <button onclick="createNFT()">Create NFT</button>
+
+    <h2>Transfer NFT</h2>
+    <input type="text" id="nftId" placeholder="NFT ID">
+    <input type="text" id="newOwner" placeholder="New Owner ID">
+    <button onclick="transferNFT()">Transfer NFT</button>
+
+    <h2>View User's NFTs</h2>
+    <input type="text" id="userId" placeholder="User ID">
+    <button onclick="getUserNFTs()">Get User's NFTs</button>
+
+    <div id="nftList"></div>
+
+    <script>
+        async function createNFT() {
+            const name = document.getElementById('nftName').value;
+            const description = document.getElementById('nftDescription').value;
+            const owner = document.getElementById('nftOwner').value;
+            
+            const response = await fetch('/create_nft', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, description, owner})
+            });
+            const data = await response.json();
+            alert(`NFT created with ID: ${data.nft_id}`);
+        }
+
+        async function transferNFT() {
+            const nft_id = document.getElementById('nftId').value;
+            const new_owner = document.getElementById('newOwner').value;
+            
+            const response = await fetch('/transfer_nft', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({nft_id, new_owner})
+            });
+            const data = await response.json();
+            alert(data.message);
+        }
+
+        async function getUserNFTs() {
+            const userId = document.getElementById('userId').value;
+            const response = await fetch(`/get_user_nfts/${userId}`);
+            const nfts = await response.json();
+            
+            const nftList = document.getElementById('nftList');
+            nftList.innerHTML = '';
+            nfts.forEach(nft => {
+                const nftElement = document.createElement('div');
+                nftElement.className = 'nft-item';
+                nftElement.innerHTML = `
+                    <h3>${nft.name}</h3>
+                    <p>${nft.description}</p>
+                    <p>Owner: ${nft.owner}</p>
+                    <p>ID: ${nft.id}</p>
+                `;
+                nftList.appendChild(nftElement);
+            });
+        }
+    </script>
+</body>
+</html>
